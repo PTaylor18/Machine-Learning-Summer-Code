@@ -1,2 +1,2 @@
 # Machine-Learning-Summer-Code
-Repository containing code for my learning of classical and quantum machine learning with assistance from the QUDOS group at the University of Exeter
+Repository containing code for my learning of classical and quantum machine learning with help from the QuDOS group at the University of Exeter
