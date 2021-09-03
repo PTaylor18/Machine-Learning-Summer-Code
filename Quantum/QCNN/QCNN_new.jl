@@ -6,6 +6,7 @@ using DataFrames, CSV
 using Plots
 using YaoPlots
 using Test, Random
+using LIBSVM
 
 include("w_ansatz.jl")
 include("pooling.jl")
@@ -105,7 +106,7 @@ plot(Uθ)
 	loop over each label so that the cost function is the sum from each label
 		then optimize the sum cost function
 
-			need to figure out dispatching for epochs and actual loss 
+			need to figure out dispatching for epochs and actual loss
 """
 
 
@@ -146,6 +147,31 @@ end
 solution
 plot(feature_1, solution, seriestype=:scatter)
 labels
+
+# support vector machine
+
+using RDatasets
+
+iris = dataset("datasets", "iris")
+
+X = Matrix(iris[:, 1:4])'
+y = iris.Species
+
+Xtrain = X[:, 1:2:end]
+Xtest  = X[:, 2:2:end]
+ytrain = y[1:2:end]
+ytest  = y[2:2:end]
+
+model = svmtrain(Xtrain, ytrain)
+
+
+solution = reshape(solution, length(solution), 1)
+
+model = svmtrain(solution, labels)
+
+
+typeof(solution)
+
 function classifier(solution)
     predictions = Vector{Int64}()
     for i=1:length(solution)
@@ -157,6 +183,8 @@ function classifier(solution)
     end
     predictions
 end
+
+# svm
 
 predictions = classifier(solution)
 
