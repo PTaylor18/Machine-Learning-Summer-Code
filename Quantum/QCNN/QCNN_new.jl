@@ -109,8 +109,6 @@ plot(Uθ)
 			need to figure out dispatching for epochs and actual loss
 """
 
-
-
 #(-1* labels[i] * log(expect(cost, zero_state(N) |> feature_map(N, feature_1[i], feature_2[i]) => dispatch!(Uθ, x))) |> real)
 #((expect(cost, zero_state(N) |> feature_map(N, feature_1[i], feature_2[i]) => dispatch!(Uθ, x)) - labels[i]) |> real)
 begin
@@ -148,45 +146,27 @@ solution
 plot(feature_1, solution, seriestype=:scatter)
 labels
 
-# support vector machine
+# support vector machine to classify
 
-using RDatasets
+model = svmtrain(solution', labels)
+predictions = svmpredict(model, solution')[1]
 
-iris = dataset("datasets", "iris")
+# old classifier
 
-X = Matrix(iris[:, 1:4])'
-y = iris.Species
+# function classifier(solution)
+#     predictions = Vector{Int64}()
+#     for i=1:length(solution)
+#         if solution[i] >= 0
+#             append!(predictions, 0)
+#         elseif solution[i] < 0
+#             append!(predictions, 1)
+#         end
+#     end
+#     predictions
+# end
+#
+# predictions = classifier(solution)
 
-Xtrain = X[:, 1:2:end]
-Xtest  = X[:, 2:2:end]
-ytrain = y[1:2:end]
-ytest  = y[2:2:end]
-
-model = svmtrain(Xtrain, ytrain)
-
-
-solution = reshape(solution, length(solution), 1)
-
-model = svmtrain(solution, labels)
-
-
-typeof(solution)
-
-function classifier(solution)
-    predictions = Vector{Int64}()
-    for i=1:length(solution)
-        if solution[i] >= 0
-            append!(predictions, 0)
-        elseif solution[i] < 0
-            append!(predictions, 1)
-        end
-    end
-    predictions
-end
-
-# svm
-
-predictions = classifier(solution)
 
 begin
 	gdf = groupby(two_d_data, :3)
