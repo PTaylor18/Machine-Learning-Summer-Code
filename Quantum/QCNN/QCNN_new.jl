@@ -1,11 +1,7 @@
-using Yao, YaoExtensions, Compose
-using LinearAlgebra
-using QuAlgorithmZoo: Adam, update!
+using Yao, YaoExtensions
 using Optim
 using DataFrames, CSV
 using Plots
-using YaoPlots
-using Test, Random
 using LIBSVM
 
 include("w_ansatz.jl")
@@ -167,7 +163,6 @@ predictions = svmpredict(model, solution')[1]
 #
 # predictions = classifier(solution)
 
-
 begin
 	gdf = groupby(two_d_data, :3)
 	plot(gdf[2].x, gdf[2].y, seriestype=:scatter, color=:red, label='0')
@@ -178,3 +173,13 @@ begin
 	plot!(gdf2[1].x, gdf2[1].y, seriestype=:scatter, color=:green, label='0')
 	plot!(gdf2[2].x, gdf2[2].y, seriestype=:scatter, color=:orange, label='1')
 end
+
+"""
+	now evaluate the model using F1 score
+"""
+using EvalMetrics
+
+cm = EvalMetrics.ConfusionMatrix(labels, predictions) # confusion matrix
+
+accuracy = EvalMetrics.accuracy(cm)
+f1 = f1_score(cm)
