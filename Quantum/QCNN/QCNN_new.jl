@@ -21,14 +21,42 @@ two_d_data = CSV.File("2D Classification Data.csv") |> DataFrame
 two_d_data = two_d_data[!, Not(:Column1)]
 
 train = two_d_data[!, Not(:label)]
-feature_1 = train[!,1]
-feature_2 = train[!,2]
+begin
+	feature_1 = train[!,1]
+	feature_2 = train[!,2]
+	labels = two_d_data[!,3]
+end
 
-labels = two_d_data[!,3]
+#---
+
+five_feature_data = CSV.File("5 Feature Classification Data.csv") |> DataFrame
+five_feature_data = five_feature_data[!, Not(:Column1)]
+train = five_feature_data[!, Not(:label)]
+begin
+	feature_1 = train[!,1]
+	feature_2 = train[!,2]
+	feature_3 = train[!,3]
+	feature_4 = train[!,4]
+	feature_5 = train[!,5]
+	labels = five_feature_data[!,6]
+end
+
+#---
+
+circles_data = CSV.File("Circles Classification Data.csv") |> DataFrame
+circles_data = circles_data[!, Not(:Column1)]
+train = circles_data[!, Not(:label)]
+begin
+	feature_1 = train[!,1]
+	feature_2 = train[!,2]
+	labels = two_d_data[!,3]
+end
+
+#---
 
 # plot data
 begin
-	gdf = groupby(two_d_data, :3)
+	gdf = groupby(circles_data, :3)
 	plot(gdf[2].x, gdf[2].y, seriestype=:scatter, color=:red, label='0')
 	plot!(gdf[1].x, gdf[1].y, seriestype=:scatter, color=:blue, label='1')
 end
@@ -39,6 +67,14 @@ N = 8
 # define feature map
 function feature_map(n, x, t)
     return chain(n, chain(n, [put(i=>Rz(3*acos(x))) for i=1:n]), chain(n, [put(i=>Ry(2*asin(t))) for i=1:n]))
+end
+
+# feature map for 5 features
+function feature_map(n, x, t, z)
+    return chain(n,
+	 chain(n, [put(i=>Rz(3*acos(x))) for i=1:n]),
+	 chain(n, [put(i=>Ry(2*asin(t))) for i=1:n]),
+	 chain(n, [put(i=>Rx(2*acos(z))) for i=1:n]))
 end
 
 # observable
@@ -97,13 +133,29 @@ cost = sz1
 plot(Uθ)
 
 """
-	potentially alter by having cost function as -Σ (y . log(ŷ)) and sum for each label.
-
-	loop over each label so that the cost function is the sum from each label
-		then optimize the sum cost function
-
-			need to figure out dispatching for epochs and actual loss
+	need to figure out loss recording and make faster
 """
+
+function cost_optim(x)
+	cost_sum = 0
+
+	for i=1:length(labels)
+		cost_sum += (1/length(labels)) * (-1* labels[i] * log(expect(cost, zero_state(N) |> feature_map(N, feature_1[i], feature_2[i], feature_3[i]) => dispatch!(Uθ, x))) |> real)
+	end
+	println(cost_sum)
+	cost_sum
+end
+
+begin
+	res = Optim.minimizer((optimize(x->cost_optim(x),
+			parameters(Uθ),
+			LBFGS(),
+			Optim.Options(iterations=1))))
+end
+
+
+
+
 
 #(-1* labels[i] * log(expect(cost, zero_state(N) |> feature_map(N, feature_1[i], feature_2[i]) => dispatch!(Uθ, x))) |> real)
 #((expect(cost, zero_state(N) |> feature_map(N, feature_1[i], feature_2[i]) => dispatch!(Uθ, x)) - labels[i]) |> real)
@@ -133,7 +185,7 @@ new_params = parameters(Uθ)
 solution = Vector{Float64}()
 for i=1:length(labels)
     dispatch!(Uθ, new_params)
-    append!(solution, (expect(cost, (zero_state(N) |> feature_map(N, feature_1[i], feature_2[i])) |> Uθ) |> real))
+    append!(solution, (expect(cost, (zero_state(N) |> feature_map(N,  feature_1[i], feature_2[i], feature_3[i])) |> Uθ) |> real))
 end
 
 #---
@@ -164,7 +216,7 @@ predictions = svmpredict(model, solution')[1]
 # predictions = classifier(solution)
 
 begin
-	gdf = groupby(two_d_data, :3)
+	gdf = groupby(five_feature_data, :3)
 	plot(gdf[2].x, gdf[2].y, seriestype=:scatter, color=:red, label='0')
 	plot!(gdf[1].x, gdf[1].y, seriestype=:scatter, color=:blue, label='1')
 
@@ -173,7 +225,6 @@ begin
 	plot!(gdf2[1].x, gdf2[1].y, seriestype=:scatter, color=:green, label='0')
 	plot!(gdf2[2].x, gdf2[2].y, seriestype=:scatter, color=:orange, label='1')
 end
-
 """
 	now evaluate the model using F1 score
 """
@@ -183,3 +234,5 @@ cm = EvalMetrics.ConfusionMatrix(labels, predictions) # confusion matrix
 
 accuracy = EvalMetrics.accuracy(cm)
 f1 = f1_score(cm)
+
+#0.985
