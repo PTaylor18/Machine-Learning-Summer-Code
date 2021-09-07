@@ -9,3 +9,4 @@ Repository containing code for my learning of classical and quantum machine lear
 ![vqc](images/VQC_Circuit.png)
 
 * Quantum Convolutional Neural Network
+* Fully Connected QCNN with no Pooling Layers
