@@ -13,3 +13,5 @@ Repository containing code for my learning of classical and quantum machine lear
 ![qcnn](images/QCNN.png)
 
 * Fully Connected QCNN with no Pooling Layers
+
+![fc](images/fully_connected.png)
