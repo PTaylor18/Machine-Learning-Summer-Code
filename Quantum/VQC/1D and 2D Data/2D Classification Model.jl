@@ -1,10 +1,10 @@
 using Yao, YaoExtensions
 using LinearAlgebra
 using QuAlgorithmZoo: Adam, update!
-using CSV
-using DataFrames
+using DataFrames, CSV
 using Plots
-using StatsPlots
+using LIBSVM
+using Random
 
 # read in data
 two_d_data = CSV.File("2D Classification Data.csv") |> DataFrame
@@ -17,9 +17,11 @@ feature_2 = train[!,2]
 labels = two_d_data[!,3]
 
 # plot data
-gdf = groupby(two_d_data, :3)
-plot(gdf[2].x, gdf[2].y, seriestype=:scatter, color=:red, label='0')
-plot!(gdf[1].x, gdf[1].y, seriestype=:scatter, color=:blue, label='1')
+begin
+    gdf = groupby(two_d_data, :3)
+    plot(gdf[2].x, gdf[2].y, seriestype=:scatter, color=:red, label='0')
+    plot!(gdf[1].x, gdf[1].y, seriestype=:scatter, color=:blue, label='1')
+end
 
 # split into train and test data
 test = splice!(train, 20:59)
@@ -51,6 +53,16 @@ loss_vec = Vector{Float64}()
 grad_params_sum = zeros(length(params)) # vector of derivatives
 niter = 200
 cost = magn
+
+grad_params = zeros(length(params)); # vector of derivatives
+for i=1:length(labels)
+    # calculate sum of gradients
+    dCdθ = expect'(cost, (zero_state(N) |> feature_map(N, feature_1[i], feature_2[i])) => Uθ).second; # gradient of <C>
+    grad_params += 2. * ((expect(cost, (zero_state(N) |> feature_map(N, feature_1[i], feature_2[i])) => Uθ) - labels[i]) |> real) * dCdθ; # full loss function grads
+end
+
+grad_params
+
 for j = 1:niter
     grad_params = zeros(length(params)); # vector of derivatives
     for i=1:length(labels)
@@ -82,7 +94,11 @@ for i=1:length(labels)
 end
 #---
 
-# classify
+# classify using SVM
+
+model = svmtrain(solution', labels)
+predictions = svmpredict(model, solution')[1]
+
 function classifier(solution)
     predictions = Vector{Int64}()
     for i=1:length(solution)
@@ -98,10 +114,28 @@ end
 predictions = classifier(solution)
 
 # plot predictions
-pred_df = DataFrame(x=feature_1, y=feature_2, predictions=predictions)
-gdf2 = groupby(pred_df,:3);
-plot!(gdf2[1].x, gdf2[1].y, seriestype=:scatter, color=:green, label='0')
-plot!(gdf2[2].x, gdf2[2].y, seriestype=:scatter, color=:orange, label='1')
 
-println("Finished")
+
+begin
+	gdf = groupby(two_d_data, :3)
+    plot(gdf[2].x, gdf[2].y, seriestype=:scatter, color=:red, label='0')
+    plot!(gdf[1].x, gdf[1].y, seriestype=:scatter, color=:blue, label='1')
+
+    pred_df = DataFrame(x=feature_1, y=feature_2, predictions=predictions)
+    gdf2 = groupby(pred_df,:3);
+    plot!(gdf2[1].x, gdf2[1].y, seriestype=:scatter, color=:green, label='0')
+    plot!(gdf2[2].x, gdf2[2].y, seriestype=:scatter, color=:orange, label='1')
+end
+
+"""
+	now evaluate the model using accuracy and F1 score
+"""
+using EvalMetrics
+
+cm = EvalMetrics.ConfusionMatrix(labels, predictions) # confusion matrix
+
+accuracy = EvalMetrics.accuracy(cm)
+f1 = f1_score(cm)
+
+
 #---
