@@ -3,6 +3,8 @@ using Optim
 using DataFrames, CSV
 using Plots
 using LIBSVM
+using Random
+using StatsBase
 
 include("w_ansatz.jl")
 include("pooling.jl")
@@ -17,6 +19,7 @@ include("pooling.jl")
 """
 
 # read in data
+
 two_d_data = CSV.File("2D Classification Data.csv") |> DataFrame
 two_d_data = two_d_data[!, Not(:Column1)]
 
@@ -43,13 +46,48 @@ end
 
 #---
 
-circles_data = CSV.File("Circles Classification Data.csv") |> DataFrame
-circles_data = circles_data[!, Not(:Column1)]
-train = circles_data[!, Not(:label)]
+three_feature_data = CSV.File("3 Feature Classification Data.csv") |> DataFrame
+three_feature_data = three_feature_data[!, Not(:Column1)]
+train = three_feature_data[!, Not(:label)]
 begin
 	feature_1 = train[!,1]
 	feature_2 = train[!,2]
-	labels = two_d_data[!,3]
+	feature_3 = train[!,3]
+	labels = three_feature_data[!,4]
+end
+
+#---
+
+circles_data = CSV.File("Circles Classification Data.csv") |> DataFrame
+circles_data = circles_data[!, Not(:Column1)]
+
+f(x,y) = x^2 + y^2; # equation of a circle
+
+circles_data.z = f.(circles_data.x, circles_data.y); # apply function to columns
+circles_data = circles_data[!, [:x,:y,:z,:label]]
+
+scaler = fit(UnitRangeTransform, circles_data[!,3], dims=1)
+circles_data.z = StatsBase.transform(scaler, circles_data[!,3]); # scale z column to 0-1
+
+train = circles_data[!, Not(:label)]
+
+begin
+	feature_1 = train[!,1]
+	feature_2 = train[!,2]
+	z_feature = train[!,3]
+	labels = circles_data[!,4]
+end
+
+begin
+	gdf = groupby(circles_data, :4)
+	plot(gdf[2].x, gdf[2].z, seriestype=:scatter, color=:red, label='0')
+	plot!(gdf[1].x, gdf[1].z, seriestype=:scatter, color=:blue, label='1')
+end
+
+begin
+	gdf = groupby(circles_data, :4)
+	plot(gdf[2].x, gdf[2].y, seriestype=:scatter, color=:red, label='0')
+	plot!(gdf[1].x, gdf[1].y, seriestype=:scatter, color=:blue, label='1')
 end
 
 #---
@@ -120,6 +158,8 @@ rho = statevec(stest) * (statevec(stest))'
 
 # train the circuit
 
+Random.seed!(5) # 28 gives accuracy of 1 for 5 features
+
 Uθ = QCNN(8, 0.1, 0.2)
 dispatch!(Uθ, :random)
 params = parameters(Uθ)
@@ -140,7 +180,7 @@ function cost_optim(x)
 	cost_sum = 0
 
 	for i=1:length(labels)
-		cost_sum += (1/length(labels)) * (-1* labels[i] * log(expect(cost, zero_state(N) |> feature_map(N, feature_1[i], feature_2[i], feature_3[i]) => dispatch!(Uθ, x))) |> real)
+		cost_sum += (1/length(labels)) * (-1* labels[i] * log(expect(cost, zero_state(N) |> feature_map(N, feature_1[i], z_feature[i]) => dispatch!(Uθ, x))) |> real)
 	end
 	println(cost_sum)
 	cost_sum
@@ -153,7 +193,8 @@ begin
 			Optim.Options(iterations=1))))
 end
 
-
+# Thetas for the pooling layers are not yet constant as they should be
+# need to figure out how to keep constant in initial random dispatch and during optimization
 
 
 
@@ -185,7 +226,7 @@ new_params = parameters(Uθ)
 solution = Vector{Float64}()
 for i=1:length(labels)
     dispatch!(Uθ, new_params)
-    append!(solution, (expect(cost, (zero_state(N) |> feature_map(N,  feature_1[i], feature_2[i], feature_3[i])) |> Uθ) |> real))
+    append!(solution, (expect(cost, (zero_state(N) |> feature_map(N, feature_1[i], z_feature[i])) |> Uθ) |> real))
 end
 
 #---
@@ -216,17 +257,18 @@ predictions = svmpredict(model, solution')[1]
 # predictions = classifier(solution)
 
 begin
-	gdf = groupby(five_feature_data, :3)
+	gdf = groupby(circles_data, :4)
 	plot(gdf[2].x, gdf[2].y, seriestype=:scatter, color=:red, label='0')
 	plot!(gdf[1].x, gdf[1].y, seriestype=:scatter, color=:blue, label='1')
 
 	pred_df = DataFrame(x=feature_1, y=feature_2, predictions=predictions)
 	gdf2 = groupby(pred_df,:3);
-	plot!(gdf2[1].x, gdf2[1].y, seriestype=:scatter, color=:green, label='0')
-	plot!(gdf2[2].x, gdf2[2].y, seriestype=:scatter, color=:orange, label='1')
+	plot!(gdf2[2].x, gdf2[2].y, seriestype=:scatter, color=:green, label='0')
+	plot!(gdf2[1].x, gdf2[1].y, seriestype=:scatter, color=:orange, label='1')
 end
+
 """
-	now evaluate the model using F1 score
+	now evaluate the model using accuracy and F1 score
 """
 using EvalMetrics
 
