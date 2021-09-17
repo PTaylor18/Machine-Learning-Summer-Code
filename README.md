@@ -20,9 +20,16 @@ QCNN architecture is comprised of convolutional layers followed by pooling layer
 
 The pooling layer contains measurements on half of the qubits with the outcome of the measurement controlling a unitary acting on the neighbouring qubit, in which a pooling operation of two qubits maps the 2 qubit Hilbert space to a 1 qubit Hilbert space. Each pooling layer is followed by a convolutional layer until the final Hilbert space of the system is sufficiently small and the output state of the circuit is measured by an operator.
 
+In theory, the QCNN should have the best performance compared to that of the VQC and the fully connected models and should be close to that of a classical CNN.
+
 
 * Fully Connected Neural Network with no Pooling Layers
 
 ![fc](images/fully_connected.png)
 
 The fully connected model is essentially a QCNN without pooling layers and is instead completely composed of layers of the same two qubit unitaries as used in the QCNN, therefore keeping a constant input dimension throughtout the entire circuit.
+
+## Results
+
+The datasets used to benchmark the models can be found in the [datasets](datasets/) folder and include 2 feature, 3 feature, 5 feature and circular datasets.
+
