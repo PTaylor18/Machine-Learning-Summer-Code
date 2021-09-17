@@ -8,7 +8,7 @@ Classical models include a convolutional neural network for classification of th
 
 * Variational Quantum Classifier
 
-<img src="images/VQC_Circuit.png" height="100">
+<img src="images/VQC_Circuit.png" height="220">
 
 The simplest of the three architectures and an essential base for the following models is the VQC, it includes a feature map to encode classical data using angle encoding. The ansatz is a circuit with variational parameters that can be updated with angles determined by a classical optimization process. Using a variational circuit from [YaoExtensions](https://github.com/QuantumBFS/YaoExtensions.jl) the ansatz is composed of multiple layers of parametrized rotations on each qubit followed by a ladder of CNOTs and a final series of parametrized rotations. The number of layers can be changed to alter the number of parameters the circuit uses. Each qubit is then measured.
 
