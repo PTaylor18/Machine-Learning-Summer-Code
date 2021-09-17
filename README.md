@@ -16,11 +16,13 @@ The simplest of the three architectures and an essential base for the following 
 
 ![qcnn](images/QCNN.png)
 
-QCNN architecture is comprised of convolutional layers followed by pooling layers much like the classical counterpart. The convolutional layers contain two rows of two qubit unitaries which act on alternating pairs of qubits, composed of variational parameters. These unitaries are similar to that of the VQC but instead use a slightly different architecture[1] that only acts on 2 neighbouring qubits.
+QCNN architecture is comprised of convolutional layers followed by pooling layers much like the classical counterpart. The convolutional layers contain two rows of two qubit unitaries which act on alternating pairs of qubits, composed of variational parameters. These unitaries are similar to that of the VQC but instead use a slightly different architecture that only acts on 2 neighbouring qubits.
 
 The pooling layer contains measurements on half of the qubits with the outcome of the measurement controlling a unitary acting on the neighbouring qubit, in which a pooling operation of two qubits maps the 2 qubit Hilbert space to a 1 qubit Hilbert space. Each pooling layer is followed by a convolutional layer until the final Hilbert space of the system is sufficiently small and the output state of the circuit is measured by an operator.
 
 In theory, the QCNN should have the best performance compared to that of the VQC and the fully connected models and should be close to that of a classical CNN.
+
+The arcitecture used in the QCNN follows ideas from [arXiv:1810.03787v2](https://arxiv.org/pdf/1810.03787.pdf), [arXiv:2011.02966v1](https://arxiv.org/pdf/2011.02966.pdf), [arXiv:2108.00661v1](https://arxiv.org/pdf/2108.00661.pdf) and [arXiv:2009.09423v1](https://arxiv.org/pdf/2009.09423.pdf).
 
 
 * Fully Connected Neural Network with no Pooling Layers
@@ -32,4 +34,3 @@ The fully connected model is essentially a QCNN without pooling layers and is in
 ## Results
 
 The datasets used to benchmark the models can be found in the [datasets](datasets/) folder and include 2 feature, 3 feature, 5 feature and circular datasets.
-
