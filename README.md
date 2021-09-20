@@ -1,7 +1,7 @@
 # Machine-Learning-Summer-Code
 Repository containing code for my learning of classical and quantum machine learning with help from the QuDOS group at the University of Exeter.
 
-Classical models include a convolutional neural network for classification of the MNIST dataset using TensorFlow. Quantum models include a variational quantum classifier, quantum convolutional neural network and a fully connected quantum neural network using the [Yao Quantum](https://yaoquantum.org/) package for Julia with a goal to compare performance of the three QML architectures with multiple simple datasets.
+Classical models include a convolutional neural network for classification of the MNIST dataset using TensorFlow. Quantum models include a quantum kernel with support vector classification in Qiskit, a variational quantum classifier, quantum convolutional neural network and a fully connected quantum neural network using the [Yao Quantum](https://yaoquantum.org/) package for Julia with a goal to compare performance of the three QML architectures with multiple simple datasets.
 
 ## Models
 
