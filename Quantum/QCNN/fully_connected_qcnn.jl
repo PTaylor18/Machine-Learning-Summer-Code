@@ -28,9 +28,11 @@ labels = two_d_data[!,3]
 
 #---
 
+N = 8
+
 # define feature map
 function feature_map(n, x, t)
-    return chain(n, chain(n, [put(i=>Rz(3*acos(x))) for i=1:n]), chain(n, [put(i=>Ry(2*asin(t))) for i=1:n]))
+    return chain(n, chain(n, [put(i=>Rz(3*asin(x))) for i=1:n]), chain(n, [put(i=>Ry(2*acos(t))) for i=1:n]))
 end
 
 # cost function
@@ -48,6 +50,8 @@ end
 
 #---
 
+Random.seed!(28)
+
 # assign paramters to QCNN
 Uθ_FC = FC_QCNN(8, 0.1, 0.2)
 dispatch!(Uθ_FC, :random)
@@ -62,26 +66,47 @@ plot(Uθ_FC)
 
 #---
 
-# train the model
+# train the model - old
+# begin
+#     for i=1:length(labels)
+# 		optimize(x->(-1* labels[i] * log(expect(cost, zero_state(N) |> feature_map(N, feature_1[i], feature_2[i]) => dispatch!(Uθ_FC, x))) |> real),
+# 	            parameters(Uθ_FC),
+# 	            LBFGS(),
+# 	            Optim.Options(iterations=1))
+#     end
+# end
+
+# train the model - new
+
+function cost_optim(x)
+	cost_sum = 0
+
+	for i=1:length(labels)
+		cost_sum += (1/length(labels)) * (-1* labels[i] * log(expect(cost, zero_state(N) |> feature_map(N, feature_1[i], feature_2[i], feature_3[i]) => dispatch!(Uθ_FC, x))) |> real)
+	end
+	cost_sum
+end
+
 begin
-    for i=1:length(labels)
-		optimize(x->(-1* labels[i] * log(expect(cost, zero_state(N) |> feature_map(N, feature_1[i], feature_2[i]) => dispatch!(Uθ_FC, x))) |> real),
-	            parameters(Uθ_FC),
-	            LBFGS(),
-	            Optim.Options(iterations=1))
-    end
+	res = Optim.minimizer((optimize(x->cost_optim(x),
+			parameters(Uθ_FC),
+			LBFGS(),
+			Optim.Options(iterations=1))))
 end
 
 new_params = parameters(Uθ_FC)
 solution = Vector{Float64}()
 for i=1:length(labels)
     dispatch!(Uθ_FC, new_params)
-    append!(solution, (expect(cost, (zero_state(N) |> feature_map(N, feature_1[i], feature_2[i])) |> Uθ_FC) |> real))
+    append!(solution, (expect(cost, (zero_state(N) |> feature_map(N, feature_1[i], feature_2[i], feature_3[i])) |> Uθ_FC) |> real))
 end
 solution
 
 plot(feature_1, solution, seriestype=:scatter)
 labels
+
+model = svmtrain(solution', labels)
+predictions = svmpredict(model, solution')[1]
 
 begin
 	gdf = groupby(two_d_data, :3)
@@ -93,9 +118,6 @@ begin
 	plot!(gdf2[1].x, gdf2[1].y, seriestype=:scatter, color=:green, label='0')
 	plot!(gdf2[2].x, gdf2[2].y, seriestype=:scatter, color=:orange, label='1')
 end
-
-model = svmtrain(solution', labels)
-predictions = svmpredict(model, solution')[1]
 
 """
 	now evaluate the model using F1 score
