@@ -20,7 +20,7 @@ QCNN architecture is comprised of convolutional layers followed by pooling layer
 
 The pooling layer contains measurements on half of the qubits with the outcome of the measurement controlling a unitary acting on the neighbouring qubit, in which a pooling operation of two qubits maps the 2 qubit Hilbert space to a 1 qubit Hilbert space. Each pooling layer is followed by a convolutional layer until the final Hilbert space of the system is sufficiently small and the output state of the circuit is measured by an operator.
 
-In theory, the QCNN should have the best performance compared to that of the VQC and the fully connected models and should be close to that of a classical CNN.
+In theory, the QCNN should have the best performance compared to that of the VQC and the fully connected models with the number of variational parameters being O(log(N)) for N qubits. With this and the circuits use of only nearest neighbour interactions therefore mean that the ansatz is hardware efficient.
 
 The architecture used in the QCNN follows ideas from [arXiv:1810.03787v2](https://arxiv.org/pdf/1810.03787.pdf), [arXiv:2011.02966v1](https://arxiv.org/pdf/2011.02966.pdf), [arXiv:2108.00661v1](https://arxiv.org/pdf/2108.00661.pdf) and [arXiv:2009.09423v1](https://arxiv.org/pdf/2009.09423.pdf).
 
