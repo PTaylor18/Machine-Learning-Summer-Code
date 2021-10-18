@@ -1,9 +1,9 @@
 # Machine-Learning-Summer-Code
 This is a repository containing code for my learning of classical and quantum machine learning, coming from the summer internship at the [QuDOS group](https://kyriienko.github.io/), University of Exeter.
 
-Upon starting my masters project in quantum time crystals and learning about quantum computing, I have had the inspiration to learn about machine learning and the quantum application of it, therefore I have begun to understand and make my own ML models using both approaches. 
+Upon starting my masters project in quantum time crystals and learning about quantum computing, I have had the inspiration to learn about machine learning and its applications, specifically in quantum tech. Therefore, I have begun to understand and build my own ML models using both approaches. 
 
-Classical models include a convolutional neural network for classification of the MNIST dataset using TensorFlow. Quantum models include a quantum kernel with support vector classification in Qiskit, a variational quantum classifier, quantum convolutional neural network and a fully connected quantum neural network using the [Yao Quantum](https://yaoquantum.org/) package for Julia with a goal to compare performance of the three QML architectures with multiple simple datasets.
+Classical models include a convolutional neural network for classification of the MNIST dataset using TensorFlow. Quantum models include a quantum kernel with support vector classification in Qiskit, a variational quantum classifier, quantum convolutional neural network and a fully connected quantum neural network using the [Yao Quantum](https://yaoquantum.org/) package for Julia. My goal is to compare performance of the three QML architectures on simple datasets.
 
 ## Models
 
