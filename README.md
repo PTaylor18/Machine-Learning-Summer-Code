@@ -1,5 +1,5 @@
 # Machine-Learning-Summer-Code
-Repository containing code for my learning of classical and quantum machine learning with help from the QuDOS group at the University of Exeter.
+This is a repository containing code for my learning of classical and quantum machine learning, coming from the summer internship at the [QuDOS group](https://kyriienko.github.io/), University of Exeter.
 
 Upon starting my masters project in quantum time crystals and learning about quantum computing, I have had the inspiration to learn about machine learning and the quantum application of it, therefore I have begun to understand and make my own ML models using both approaches. 
 
