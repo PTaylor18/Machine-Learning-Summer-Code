@@ -12,9 +12,7 @@ Classical models include a convolutional neural network for classification of th
 
 <img src="images/VQC_Circuit.png" height="220">
 
-The simplest of the three architectures and an essential base for the following models is the VQC, it includes a feature map to encode classical data using angle encoding. The ansatz is a circuit with variational parameters that can be updated with angles determined by a classical optimization process. Using a variational circuit from [YaoExtensions](https://github.com/QuantumBFS/YaoExtensions.jl) the ansatz is composed of multiple layers of parametrized rotations on each qubit followed by a ladder of CNOTs and a final series of parametrized rotations. The number of layers can be changed to alter the number of parameters the circuit uses. Each qubit is then measured.
-
-Optimization of this circuit uses Yao's built in automatic differentiation and the ADAM optimizer from [QuAlgorithmZoo](https://github.com/QuantumBFS/QuAlgorithmZoo.jl).
+VQC is the simplest of the three architectures and an essential base for the following models. It relies on a feature map to encode classical data using parametrised rotations, followed by a fully-connected circuit shown above. Upon readout, we want to train the quantun neural network (QNN) to solve a classification task, as specified in a loss function. The variational parameters in the ansatz can be updated to minimize the loss using any classical optimization algorithm. Here I use the ansatz composed of multiple layers of parametrized rotations separate to each qubit followed by a ladder of CNOTs, and a final series of parametrized rotations (hardware-efficient ansatz). The number of layers can be changed to alter the number of parameters the circuit uses. Each qubit is then measured. The circuit is optimized using Yao's gradient evaluator based on automatic differentiation. Simple version of ADAM is used for optimization.
 
 * Quantum Convolutional Neural Network
 
