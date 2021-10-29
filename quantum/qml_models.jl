@@ -11,7 +11,7 @@ include("fcnn/fully_connected_neural_network.jl")
 	load in three feature dataset
 """
 
-three_feature_data = CSV.File("datasets/3 Feature Classification Data.csv") |> DataFrame
+three_feature_data = CSV.File("github.com/PTaylor18/Machine-Learning-Summer-Code/tree/main/datasets/3 Feature Classification Data.csv") |> DataFrame
 three_feature_data = three_feature_data[!, Not(:Column1)]
 train = three_feature_data[!, Not(:label)]
 begin
@@ -89,8 +89,6 @@ end
 model = svmtrain(solution', labels)
 predictions = svmpredict(model, solution')[1]
 
-
-
 # now evaluate the model using accuracy and f1 score
 cm = EvalMetrics.ConfusionMatrix(labels, predictions) # confusion matrix
 accuracy = EvalMetrics.accuracy(cm)
@@ -119,7 +117,7 @@ function cost_optim(x)
 	cost_sum
 end
 
-# lBFGS optimizer
+# LBFGS optimizer
 begin
 	res = Optim.minimizer((optimize(x->cost_optim(x),
 			parameters(Uθ),
@@ -152,7 +150,7 @@ f1 = f1_score(cm)
 # Random.seed!(28)
 
 # assign paramters to fully connected neural network
-Uθ_FC = FC_QCNN(8, 0.1, 0.2)
+Uθ_FC = FCNN(8)
 dispatch!(Uθ_FC, :random)
 params = parameters(Uθ_FC)
 cost = sz1
@@ -167,7 +165,7 @@ function cost_optim(x)
 	cost_sum
 end
 
-# lBFGS optimizer
+# LBFGS optimizer
 begin
 	res = Optim.minimizer((optimize(x->cost_optim(x),
 			parameters(Uθ_FC),

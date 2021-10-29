@@ -12,7 +12,7 @@ include("w_ansatz.jl")
 """
 
 # define fully connected circuit
-function FC_QCNN(N, θ_plus, θ_minus)
+function FCNN(N)
 
     cirq = chain(N)
     push!(cirq, w_circuit(N, 4))
