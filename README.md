@@ -18,15 +18,15 @@ VQC is the simplest of the three architectures and an essential base for the fol
 
 ![qcnn](images/QCNN.png)
 
-QCNN architecture is comprised of convolutional layers followed by pooling layers much like the classical counterpart. The convolutional layers contain two rows of two qubit unitaries which act on alternating pairs of qubits, composed of variational parameters. These unitaries are similar to that of the VQC but instead use a slightly different architecture that only acts on 2 neighbouring qubits.
+QCNN architecture [Nature Physics 15, 1273 (2019)] is comprised of convolutional layers followed by pooling layers much like the classical counterpart. The convolutional layers contain two rows of two qubit unitaries which act on alternating pairs of qubits, composed of variational parameters. These unitaries are similar to that of the VQC but instead use a slightly different architecture that only acts on 2 neighbouring qubits.
 
 The pooling layer contains measurements on half of the qubits with the outcome of the measurement controlling a unitary acting on the neighbouring qubit, in which a pooling operation of two qubits maps the 2 qubit Hilbert space to a 1 qubit Hilbert space. Each pooling layer is followed by a convolutional layer until the final Hilbert space of the system is sufficiently small and the output state of the circuit is measured by an operator.
 
-In theory, the QCNN should have the best performance compared to that of the VQC and the fully connected models with the number of variational parameters being O(log(N)) for N qubits. With this and the circuits use of only nearest neighbour interactions therefore mean that the ansatz is hardware efficient.
+In theory, the QCNN should have the best performance compared to that of the VQC and the fully connected models with the number of variational parameters being O(log(N)) for N qubits (see [Phys. Rev. X 11, 041011 (2021)] for the details). With this and the circuits use of only nearest neighbour interactions therefore mean that the ansatz is hardware efficient.
 
-The QCNN and fully connected circuits at the current time are not yet differentiable and instead use the LFBGS optimizer from [Optim.jl](https://github.com/JuliaNLSolvers/Optim.jl) and is numerically optimized.
+The QCNN and fully connected circuits at the current time are not yet treated with AD. Instead I use the LFBGS optimizer from [Optim.jl](https://github.com/JuliaNLSolvers/Optim.jl) and evaluate gradients numerically.
 
-The architecture used in the QCNN follows ideas from [arXiv:1810.03787v2](https://arxiv.org/pdf/1810.03787.pdf), [arXiv:2011.02966v1](https://arxiv.org/pdf/2011.02966.pdf), [arXiv:2108.00661v1](https://arxiv.org/pdf/2108.00661.pdf) and [arXiv:2009.09423v1](https://arxiv.org/pdf/2009.09423.pdf).
+To read more about the QCNN architecture you can read papers in [arXiv:1810.03787v2](https://arxiv.org/pdf/1810.03787.pdf), [arXiv:2011.02966v1](https://arxiv.org/pdf/2011.02966.pdf), [arXiv:2108.00661v1](https://arxiv.org/pdf/2108.00661.pdf) and [arXiv:2009.09423v1](https://arxiv.org/pdf/2009.09423.pdf) (I've selected arxiv versions).
 
 
 * Fully Connected Neural Network with no Pooling Layers
