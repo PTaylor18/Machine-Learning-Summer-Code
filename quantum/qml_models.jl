@@ -1,17 +1,24 @@
+using Optim
 using EvalMetrics
+using LIBSVM
+using LinearAlgebra
 using DataFrames, CSV
 using Random
 using Plots
 
-include("vqc/vqc.jl")
-include("qcnn/qcnn.jl")
-include("fcnn/fully_connected_neural_network.jl")
+include("quantum/vqc/vqc_module.jl");
+include("quantum/qcnn/qcnn.jl");
+include("quantum/fcnn/fully_connected_neural_network.jl");
 
 """
 	load in three feature dataset
 """
 
-three_feature_data = CSV.File("github.com/PTaylor18/Machine-Learning-Summer-Code/tree/main/datasets/3 Feature Classification Data.csv") |> DataFrame
+cd(dirname(@__FILE__))
+dir = pwd()
+data = "3 Feature Classification Data"
+
+three_feature_data = CSV.File("datasets/"*data*".csv") |> DataFrame
 three_feature_data = three_feature_data[!, Not(:Column1)]
 train = three_feature_data[!, Not(:label)]
 begin
@@ -38,6 +45,9 @@ function feature_map(n, x, t, z)
 	 chain(n, [put(i=>Rx(2*acos(z))) for i=1:n]))
 end
 
+# set number of qubits
+N = 8
+
 #observable
 magn = sum([chain(N, put(i=>Z)) for i=1:N])
 sz1 = chain(N, put(1=>Z))
@@ -51,7 +61,7 @@ sz1 = chain(N, put(1=>Z))
 
 optimizer = Adam(lr=0.01)
 d = 6; # QNN depth
-Uθ = variational_circuit(N, d)
+Uθ = variational_circuit(8, d)
 dispatch!(Uθ, :random)
 params = parameters(Uθ)
 loss = 0. # total cost
@@ -71,7 +81,7 @@ for j = 1:niter
     dispatch!(Uθ, update!(params, grad_params, optimizer))
     loss = 0.; # total cost
     for i=1:length(labels)
-        loss += (-1 * labels[i] * log(expect(cost, (zero_state(N) |> feature_map(N, feature_1[i], feature_2[i], feature_3[i])) |> Uθ)) |> real); # binary cross entropy
+        loss += (-1 * labels[i] * log(expect(cost, (zero_state(N) |> feature_map(N, feature_1[i], feature_2[i], feature_3[i])) |> Uθ)) |> real); # cross entropy
         #loss += (expect(cost, (zero_state(N) |> feature_map(N, train[i])) |> Uθ) - labels[i])^2 |> real; # L2 loss
     end
     loss = loss * (1/length(labels))
@@ -110,8 +120,8 @@ cost = sz1
 function cost_optim(x)
 	cost_sum = 0
 
-	for i=1:length(y_train)
-		cost_sum += (1/length(y_train)) * (-1* y_train[i] * log(expect(cost, zero_state(N) |> feature_map(N, feature_1[i], feature_2[i], feature_3[i]) => dispatch!(Uθ, x))) |> real)
+	for i=1:length(labels)
+		cost_sum += (1/length(labels)) * (-1* labels[i] * log(expect(cost, zero_state(N) |> feature_map(N, feature_1[i], feature_2[i], feature_3[i]) => dispatch!(Uθ, x))) |> real)
 	end
 	println(cost_sum)
 	cost_sum
