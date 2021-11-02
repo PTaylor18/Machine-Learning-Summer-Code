@@ -1,4 +1,4 @@
-using Yao, YaoExtensions
+using Yao, YaoExtensions, YaoBase
 
 include("w_ansatz.jl")
 include("pooling.jl")
