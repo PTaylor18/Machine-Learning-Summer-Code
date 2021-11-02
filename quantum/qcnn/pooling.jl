@@ -1,6 +1,3 @@
-using Yao
-using YaoBase
-
 export PoolingUnitary, pool
 
 """
